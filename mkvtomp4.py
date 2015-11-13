@@ -501,12 +501,12 @@ class MkvtoMp4:
                                     'path': os.path.join(dirName, fname),
                                     'source': src,
                                     'map': 0,
-                                    'codec': 'mov_text',
+                                    'codec': 'srt',
                                     'language': lang}})
 
                                 self.log.debug("Path: %s." % os.path.join(dirName, fname))
                                 self.log.debug("Source: %s." % src)
-                                self.log.debug("Codec: mov_text.")
+                                self.log.debug("Codec: srt.")
                                 self.log.debug("Langauge: %s." % lang)
 
                                 l = l + 1

@@ -214,7 +214,7 @@ class ReadSettings:
         self.output_extension = config.get(section, "output_extension")  # Output extension
         self.output_format = config.get(section, "output_format")  # Output format
         if self.output_format not in valid_formats:
-            self.output_format = 'mov'
+            self.output_format = 'mkv'
         self.delete = config.getboolean(section, "delete_original")  # Delete original file
         self.relocate_moov = config.getboolean(section, "relocate_moov")  # Relocate MOOV atom to start of file
         if self.relocate_moov:
@@ -339,9 +339,7 @@ class ReadSettings:
 
         self.scodec = config.get(section, 'subtitle-codec').strip().lower()
         if not self.scodec or self.scodec == "":
-            if self.embedsubs:
-                self.scodec = 'mov_text'
-            else:
+            if not self.embedsubs:
                 self.scodec = 'srt'
             log.warning("Invalid subtitle codec, defaulting to '%s'." % self.scodec)
 

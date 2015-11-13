@@ -65,6 +65,8 @@ if settings.deluge['convert']:
         if not os.path.exists(settings.output_dir):
             os.mkdir(settings.output_dir)
         delete_dir = settings.output_dir
+    else:
+        delete_dir = False
 
     converter = MkvtoMp4(settings)
 
