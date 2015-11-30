@@ -9,9 +9,9 @@ import argparse
 import struct
 import logging
 from readSettings import ReadSettings
-from tvdb_mp4 import Tvdb_mp4
-from tmdb_mp4 import tmdb_mp4
-from mkvtomp4 import MkvtoMp4
+from tvdb_mkv import Tvdb_mkv
+from tmdb_mkv import tmdb_mkv
+from mp4tomkv import Mp4toMkv
 from post_processor import PostProcessor
 from tvdb_api import tvdb_api
 from tmdb_api import tmdb
@@ -173,39 +173,39 @@ def processFile(inputfile, tagdata, relativePath=None):
     if tagdata is False:
         return  # This means the user has elected to skip the file
     elif tagdata is None:
-        tagmp4 = None  # No tag data specified but convert the file anyway
+        tagmkv = None  # No tag data specified but convert the file anyway
     elif tagdata[0] is 1:
         imdbid = tagdata[1]
-        tagmp4 = tmdb_mp4(imdbid, language=settings.taglanguage, logger=log)
+        tagmkv = tmdb_mkv(imdbid, language=settings.taglanguage, logger=log)
         try:
-            print("Processing %s" % (tagmp4.title.encode(sys.stdout.encoding, errors='ignore')))
+            print("Processing %s" % (tagmkv.title.encode(sys.stdout.encoding, errors='ignore')))
         except:
             print("Processing movie")
     elif tagdata[0] is 2:
         tmdbid = tagdata[1]
-        tagmp4 = tmdb_mp4(tmdbid, True, language=settings.taglanguage, logger=log)
+        tagmkv = tmdb_mkv(tmdbid, True, language=settings.taglanguage, logger=log)
         try:
-            print("Processing %s" % (tagmp4.title.encode(sys.stdout.encoding, errors='ignore')))
+            print("Processing %s" % (tagmkv.title.encode(sys.stdout.encoding, errors='ignore')))
         except:
             print("Processing movie")
     elif tagdata[0] is 3:
         tvdbid = int(tagdata[1])
         season = int(tagdata[2])
         episode = int(tagdata[3])
-        tagmp4 = Tvdb_mp4(tvdbid, season, episode, language=settings.taglanguage, logger=log)
+        tagmkv = Tvdb_mkv(tvdbid, season, episode, language=settings.taglanguage, logger=log)
         try:
-            print("Processing %s Season %02d Episode %02d - %s" % (tagmp4.show.encode(sys.stdout.encoding, errors='ignore'), int(tagmp4.season), int(tagmp4.episode), tagmp4.title.encode(sys.stdout.encoding, errors='ignore')))
+            print("Processing %s Season %02d Episode %02d - %s" % (tagmkv.show.encode(sys.stdout.encoding, errors='ignore'), int(tagmkv.season), int(tagmkv.episode), tagmkv.title.encode(sys.stdout.encoding, errors='ignore')))
         except:
             print("Processing TV episode")
 
     # Process
-    if MkvtoMp4(settings, logger=log).validSource(inputfile):
-        converter = MkvtoMp4(settings, logger=log)
+    if Mp4toMkv(settings, logger=log).validSource(inputfile):
+        converter = Mp4toMkv(settings, logger=log)
         output = converter.process(inputfile, True)
-        if tagmp4 is not None:
+        if tagmkv is not None:
             try:
-                tagmp4.setHD(output['x'], output['y'])
-                tagmp4.writeTags(output['output'], settings.artwork, settings.thumbnail)
+                tagmkv.setHD(output['x'], output['y'])
+                tagmkv.writeTags(output['output'], settings.artwork, settings.thumbnail)
             except Exception as e:
                 print("There was an error tagging the file")
                 print(e)
@@ -230,7 +230,7 @@ def walkDir(dir, silent=False, preserveRelative=False, tvdbid=None, tag=True):
             filepath = os.path.join(r, file)
             relative = os.path.split(os.path.relpath(filepath, dir))[0] if preserveRelative else None
             try:
-                if MkvtoMp4(settings, logger=log).validSource(filepath):
+                if Mp4toMkv(settings, logger=log).validSource(filepath):
                     try:
                         print("Processing file %s" % (filepath.encode(sys.stdout.encoding, errors='ignore')))
                     except:
@@ -323,7 +323,7 @@ def main():
     if os.path.isdir(path):
         tvdbid = int(args['tvdbid']) if args['tvdbid'] else None
         walkDir(path, silent, tvdbid=tvdbid, preserveRelative=args['preserveRelative'], tag=settings.tagfile)
-    elif (os.path.isfile(path) and MkvtoMp4(settings, logger=log).validSource(path)):
+    elif (os.path.isfile(path) and Mp4toMkv(settings, logger=log).validSource(path)):
         if (not settings.tagfile):
             tagdata = None
         elif (args['tvdbid'] and not (args['imdbid'] or args['tmdbid'])):
